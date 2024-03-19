@@ -1,117 +1,70 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      data: [],
+      loading: true,
+    };
+  }
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  componentDidMount() {
+    this.getapiData();
+  }
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  async getapiData() {
+    try {
+      let resp = await axios.get('https://reactnative.dev/movies.json');
+      this.setState({ data: resp.data.movies, loading: false });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      this.setState({ loading: false });
+    }
+  }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+  render() {
+    const { data, loading } = this.state;
+    return (
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <View>
+            {data.map((item, index) => (
+              <View key={item.id} style={[styles.movieContainer, { backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#e0e0e0' }]}>
+                <Text style={styles.movieTitle}>{item.title}</Text>
+                <Text style={styles.movieYear}>Release Year: {item.releaseYear}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    margin: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  movieContainer: {
+    padding: 50,
+    marginBottom: 25,
+    borderRadius: 50,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  movieTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  highlight: {
-    fontWeight: '700',
+  movieYear: {
+    fontSize: 16,
+    color: '#888',
   },
 });
 
